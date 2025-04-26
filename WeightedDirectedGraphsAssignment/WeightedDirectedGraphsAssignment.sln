@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeightedDirectedGraphsAssignment", "WeightedDirectedGraphsAssignment\WeightedDirectedGraphsAssignment.csproj", "{2900B632-86F9-44D4-989D-9C09360E3720}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2900B632-86F9-44D4-989D-9C09360E3720}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2900B632-86F9-44D4-989D-9C09360E3720}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2900B632-86F9-44D4-989D-9C09360E3720}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2900B632-86F9-44D4-989D-9C09360E3720}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FF495DF4-244E-40F0-8B22-02B654309B56}
+	EndGlobalSection
+EndGlobal
