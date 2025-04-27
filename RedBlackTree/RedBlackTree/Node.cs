@@ -6,7 +6,16 @@ using System.Threading.Tasks;
 
 namespace RedBlackTree
 {
-    class Node
+    class Node<T>
     {
+        public Node<T> Right;
+        public Node<T> Left;
+        public T Value;
+        public bool IsRed;
+
+        public Node(T value)
+        {
+            Value = value;
+        }
     }
 }
