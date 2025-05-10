@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RedBlackTree
 {
-    class RedBlackTree<T>
+    class RedBlackTree<T> where T : IComparable<T>
     {
         Node<T> root;
         int Count { get; set; }
@@ -21,18 +21,52 @@ namespace RedBlackTree
             {
                 root = new Node<T>(value);
                 root.IsRed = false;
+                Count++;
+                return;
             }
 
             Node<T> nodeToInsert = new Node<T>(value);
             nodeToInsert.IsRed = true;
             Node<T> current = root;
+            Add(nodeToInsert, current);
         }
-        public void Add(Node<T> nodeToInsert, Node<T> current)
+        public Node<T> Add(Node<T> nodeToInsert, Node<T> current)
         {
-            if (current.Left.IsRed == true && current.Right.IsRed == true)
+            if (current == null)
+            {
+                current = nodeToInsert;
+                Count++;
+                return current;
+            }
+            
+            if (current.Left != null && current.Right != null && current.Left.IsRed == true && current.Right.IsRed == true)
             {
                 FlipColor(current);
             }
+
+            if(current.Value.CompareTo(nodeToInsert.Value) == 0)
+            {
+                throw new Exception("no");
+            }
+            else if (current.Value.CompareTo(nodeToInsert.Value) > 0)
+            {
+                current.Left = Add(nodeToInsert, current.Left);
+            }
+            else
+            {
+               current.Right = Add(nodeToInsert, current.Right);
+            }
+
+            if (current.Right != null && current.Right.IsRed)
+            {
+                RotateLeft(current);
+            }
+            if (current.Left != null && current.Left.Left != null && current.Left.IsRed && current.Left.Left.IsRed)
+            {
+                RotateRight(current);
+            }
+
+            return current;
         }
         public void FlipColor(Node<T> node)
         {
@@ -62,7 +96,7 @@ namespace RedBlackTree
         }
         public bool isRed()
         {
-
+            return false;
         }
         public void Remove()
         {
