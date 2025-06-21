@@ -14,7 +14,6 @@ namespace RedBlackTree
         public RedBlackTree()
         {  
         }
-        //false == black; true == red
         public void Add(T value)
         {
             if (root == null)
@@ -27,10 +26,10 @@ namespace RedBlackTree
 
             Node<T> nodeToInsert = new Node<T>(value);
             nodeToInsert.IsRed = true;
-            Node<T> current = root;
-            Add(nodeToInsert, current);
+            root = Add(nodeToInsert, root);
+            root.IsRed = false;
         }
-        public Node<T> Add(Node<T> nodeToInsert, Node<T> current)
+        private Node<T> Add(Node<T> nodeToInsert, Node<T> current)
         {
             if (current == null)
             {
@@ -39,7 +38,7 @@ namespace RedBlackTree
                 return current;
             }
             
-            if (current.Left != null && current.Right != null && current.Left.IsRed == true && current.Right.IsRed == true)
+            if (IsRed(current.Left) && IsRed(current.Right))
             {
                 FlipColor(current);
             }
@@ -57,24 +56,32 @@ namespace RedBlackTree
                current.Right = Add(nodeToInsert, current.Right);
             }
 
-            if (current.Right != null && current.Right.IsRed)
+            if (IsRed(current.Right))
             {
-                RotateLeft(current);
+                current = RotateLeft(current);
             }
-            if (current.Left != null && current.Left.Left != null && current.Left.IsRed && current.Left.Left.IsRed)
+
+            if (current.Left != null && IsRed(current.Left) && IsRed(current.Left.Left))
             {
-                RotateRight(current);
+                current = RotateRight(current);
+                FlipColor (current);
             }
 
             return current;
         }
-        public void FlipColor(Node<T> node)
+        private void FlipColor(Node<T> node)
         {
             node.IsRed = !node.IsRed;
-            node.Left.IsRed = !node.Left.IsRed;
-            node.Right.IsRed = !node.Right.IsRed;
+            if (node.Left != null)
+            {
+                node.Left.IsRed = !node.Left.IsRed;
+            }
+            if (node.Right != null)
+            {
+                node.Right.IsRed = !node.Right.IsRed;
+            }
         }
-        public Node<T> RotateLeft(Node<T> node)
+        private Node<T> RotateLeft(Node<T> node)
         {
             node.IsRed = true;
             Node<T> savedNode = node.Right;
@@ -82,9 +89,9 @@ namespace RedBlackTree
             node.Right = node.Right.Left;
             savedNode.Left = node;
 
-            return node;
+            return savedNode;
         }
-        public Node<T> RotateRight(Node<T> node)
+        private Node<T> RotateRight(Node<T> node)
         {
             node.IsRed = true;
             Node<T> savedNode = node.Left;
@@ -92,23 +99,145 @@ namespace RedBlackTree
             node.Left = node.Left.Right;
             savedNode.Right = node;
 
+            return savedNode;
+        }
+        private bool IsRed(Node<T> node)
+        {
+            if(node == null)
+            {
+                return false;
+            }
+
+            return node.IsRed;
+        }
+        public void Remove(T value)
+        {
+            if (root == null)
+            {
+                throw new Exception("error :D");
+            }
+
+            Node<T> nodeToRemove = new Node<T>(value);
+            Count--;
+            root = Remove(nodeToRemove, root, null);
+            root.IsRed = false;
+        }
+        private Node<T> Remove(Node<T> nodeToRemove, Node<T> current, Node<T> parent)
+        {
+            if (current == null)
+            {
+                return null;
+            }
+
+            if (nodeToRemove.Value.CompareTo(current.Value) < 0)
+            {
+                if (current.Left != null && !IsRed(current.Left) && !IsRed(current.Left.Left))
+                {
+                    MoveRedLeft(current);
+                }
+
+                //current.Left = 
+                    Remove(nodeToRemove, current.Left, current);
+            }
+            else
+            {
+                if (IsRed(current.Left))
+                {
+                    current = RotateRight(current);
+                }
+                if (current.Right != null && current.Right.Right != null && current.Right.Left != null && !IsRed(current.Right.Right) && !IsRed(current.Right.Left))
+                {
+                    MoveRedRight(current);
+                }
+                Node<T> test = root;
+                if (current.Value.CompareTo(nodeToRemove.Value) == 0)
+                {
+                    if (current.Left == null && current.Right == null)
+                    {
+                        if (parent.Left == current)
+                        {
+                            parent.Left = null;
+                        }
+                        else
+                        {
+                            parent.Right = null;
+                        }
+                    }
+                    else
+                    {
+                        Node<T> replacement = current.Left;
+                        while (replacement.Right != null)
+                        {
+                            parent = replacement;
+                            replacement = replacement.Right;
+                        }
+
+                        current.Value = replacement.Value;
+
+                        Remove(replacement, root, null);           
+                    }
+                }
+                else
+                {
+                    //current.Right = 
+                        Remove(nodeToRemove, current.Right, current);
+                }
+            }
+
+            current = FixUp(current);
+            return current;
+        }
+        private void MoveRedRight(Node<T> node)
+        {
+            //if node.right is a 2 node(if it has 2 black children)
+            FlipColor(node);
+      
+            if (node.Left != null && IsRed(node.Left.Left))
+            {
+                node = RotateRight(node);
+                FlipColor(node);
+            }
+
+            return;
+        }
+        private void MoveRedLeft(Node<T> node)
+        {
+            //if node.left is a 2 node
+            FlipColor(node);
+
+            if (node.Right != null && IsRed(node.Right.Left))
+            {
+                node = RotateRight(node.Right);
+                RotateLeft(node);
+            }
+        }
+        private Node<T> FixUp(Node<T> node)
+        {
+            if (IsRed(node.Right))
+            {
+                node = RotateLeft(node);
+            }
+            if (node.Left != null && IsRed(node.Left) && IsRed(node.Left.Left))
+            {
+                node = RotateRight(node);
+            }
+            if (IsRed(node.Left) && IsRed(node.Right))
+            {
+                FlipColor(node);
+            }
+            if (node.Left != null && !IsRed(node.Left.Left) && IsRed(node.Left.Right))
+            {
+                if (IsRed(node.Left.Right))
+                {
+                    node = RotateLeft(node);
+                }
+                if (IsRed(node.Left) && IsRed(node.Left.Left))
+                {
+                    node = RotateRight(node);
+                }
+            }
+
             return node;
-        }
-        public bool isRed()
-        {
-            return false;
-        }
-        public void Remove()
-        {
-
-        }
-        public void MoveRedRight()
-        {
-
-        }
-        public void MoveRedLeft()
-        {
-
         }
     }
 }
