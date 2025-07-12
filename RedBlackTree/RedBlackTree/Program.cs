@@ -15,10 +15,11 @@
             redBlackTree.Add(6);
             redBlackTree.Add(22);
             redBlackTree.Add(27);
-            
+
             redBlackTree.Remove(27);
-            //15 and 17 disappear
-            //look at japanese visualizer
+            redBlackTree.Remove(25);
+
+            //redBlackTree.Remove(15);
         }
     }
 }

@@ -136,21 +136,19 @@ namespace RedBlackTree
                     MoveRedLeft(current);
                 }
 
-                //current.Left = 
-                    Remove(nodeToRemove, current.Left, current);
+                Remove(nodeToRemove, current.Left, current);
             }
             else
             {
                 if (IsRed(current.Left))
                 {
                     current = RotateRight(current);
+                    parent.Right = current;
                 }
-                if (current.Right != null && current.Right.Right != null && current.Right.Left != null && !IsRed(current.Right.Right) && !IsRed(current.Right.Left))
-                {
-                    MoveRedRight(current);
-                }
-                Node<T> test = root;
-                if (current.Value.CompareTo(nodeToRemove.Value) == 0)
+
+                MoveRedRight(current);
+
+                if (current.Value.CompareTo(nodeToRemove.Value) == 0)//should be a .Equals
                 {
                     if (current.Left == null && current.Right == null)
                     {
@@ -179,43 +177,53 @@ namespace RedBlackTree
                 }
                 else
                 {
-                    //current.Right = 
-                        Remove(nodeToRemove, current.Right, current);
+                    Remove(nodeToRemove, current.Right, current);
                 }
             }
 
-            current = FixUp(current);
+            current = FixUp(current, parent);
             return current;
         }
         private void MoveRedRight(Node<T> node)
         {
             //if node.right is a 2 node(if it has 2 black children)
-            FlipColor(node);
-      
-            if (node.Left != null && IsRed(node.Left.Left))
+            if (/*!IsRed(node.Right) && */node.Right != null && node.Right.Right != null && node.Right.Left != null && !IsRed(node.Right.Right) && !IsRed(node.Right.Left))
             {
-                node = RotateRight(node);
-                FlipColor(node);
-            }
+                FlipColor(node.Right);
 
+                if (node.Right.Left != null && IsRed(node.Right.Left.Left))
+                {
+                    node.Right = RotateRight(node.Right);
+                    FlipColor(node.Right);
+                }
+            }
             return;
         }
         private void MoveRedLeft(Node<T> node)
         {
             //if node.left is a 2 node
-            FlipColor(node);
-
-            if (node.Right != null && IsRed(node.Right.Left))
+            //changed MoveRedRight***
+            if (node.Left != null && !IsRed(node.Left) && !IsRed(node.Left.Left))
             {
-                node = RotateRight(node.Right);
-                RotateLeft(node);
+                FlipColor(node.Left);
+
+                if (node.Right != null && IsRed(node.Right.Left))
+                {
+                    node = RotateRight(node.Right);
+                    RotateLeft(node);
+                }
             }
         }
-        private Node<T> FixUp(Node<T> node)
+        private Node<T> FixUp(Node<T> node, Node<T> parent)
         {
             if (IsRed(node.Right))
             {
                 node = RotateLeft(node);
+                if (parent != null)
+                {
+                    parent.Right = node;
+                }
+
             }
             if (node.Left != null && IsRed(node.Left) && IsRed(node.Left.Left))
             {
