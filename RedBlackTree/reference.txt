@@ -1,0 +1,79 @@
+private Node<T> MoveRedRight(Node<T> current)
+{
+    if (current.Right == null || !current.Right.IsTwoNode) return current;
+
+    current = FlipColor(current);
+    if (!IsBlack(current.Left?.Left))
+    {
+        current = RotateRight(current);
+        current = FlipColor(current);
+    }
+
+    return current;
+}
+
+private Node<T>? RemoveRec(Node<T>? current, T value)
+{
+    if (current == null)
+    {
+        return null;
+    }
+
+    if (value.CompareTo(current.Value) < 0)
+    {
+        current = MoveRedLeft(current);
+        current.Left = RemoveRec(current.Left, value);
+    }
+    else
+    {
+
+        if (!IsBlack(current.Left))
+        {
+            current = RotateRight(current);
+        }
+
+        current = MoveRedRight(current);
+
+
+        if (current.Value.CompareTo(value) < 0)
+        {
+            current.Right = RemoveRec(current.Right, value);
+        }
+        else
+        {
+            if (current.Left == null && current.Right == null) return null;
+
+            Node<T> i = current.Right!;
+            for (; i.Left != null; i = i.Left) ;
+
+            current.Value = i.Value;
+            current.Right = RemoveRec(current.Right, i.Value);
+        }
+    }
+    return Fixup(current);
+}
+
+private Node<T>? Fixup(Node<T> current)
+{
+    if (!IsBlack(current.Right))
+    {
+        current = RotateLeft(current);
+    }
+    if (!IsBlack(current.Left) && !IsBlack(current.Left?.Left))
+    {
+        current = RotateRight(current);
+    }
+    if (current.IsFourNode)
+    {
+        current = FlipColor(current);
+    }
+    if (!IsBlack(current.Left?.Right) && IsBlack(current.Left?.Left))
+    {
+        current.Left = RotateLeft(current.Left!);
+        if (!IsBlack(current.Left) && !IsBlack(current.Left?.Left))
+        {
+            current = RotateRight(current);
+        }
+    }
+    return current;
+}

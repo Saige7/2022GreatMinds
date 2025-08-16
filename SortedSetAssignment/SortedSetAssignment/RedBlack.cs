@@ -1,18 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RedBlackTree
+namespace SortedSetAssignment
 {
-    class RedBlackTree<T> where T : IComparable<T>
+    public class RedBlack<T>
     {
-        Node<T> root;
-        int Count { get; set; }
+        private Node<T> root;
+        public int Count { get; set; }
 
-        public RedBlackTree()
-        {  
+        public IComparer<T> Comparer { get; set; }
+
+        public RedBlack(IComparer<T> comparer)
+        {
+            Comparer = comparer;
         }
         public void Add(T value)
         {
@@ -43,11 +47,11 @@ namespace RedBlackTree
                 FlipColor(current);
             }
 
-            if(current.Value.CompareTo(nodeToInsert.Value) == 0)
+            if(Comparer.Compare(current.Value, nodeToInsert.Value) == 0)
             {
                 throw new Exception("no");
             }
-            else if (current.Value.CompareTo(nodeToInsert.Value) > 0)
+            else if (Comparer.Compare(current.Value, nodeToInsert.Value) > 0)
             {
                 current.Left = Add(nodeToInsert, current.Left);
             }
@@ -119,82 +123,81 @@ namespace RedBlackTree
 
             Node<T> nodeToRemove = new Node<T>(value);
             Count--;
-            root = Remove(nodeToRemove, root, null);
+            root = Remove(nodeToRemove, root);
             root.IsRed = false;
         }
-        private Node<T> Remove(Node<T> nodeToRemove, Node<T> current, Node<T> parent)
+        private Node<T> Remove(Node<T> nodeToRemove, Node<T> current)
         {
+            //read reference.txt
+
             if (current == null)
             {
                 return null;
             }
 
-            if (nodeToRemove.Value.CompareTo(current.Value) < 0)
+            if (Comparer.Compare(nodeToRemove.Value, current.Value) < 0)
             {
-                if (current.Left != null && !IsRed(current.Left) && !IsRed(current.Left.Left))
-                {
-                    MoveRedLeft(current);
-                }
-
-                Remove(nodeToRemove, current.Left, current);
+                MoveRedLeft(current);
+                
+                current.Left = Remove(nodeToRemove, current.Left);
             }
             else
             {
                 if (IsRed(current.Left))
                 {
                     current = RotateRight(current);
-                    parent.Right = current;
                 }
 
                 MoveRedRight(current);
 
-                if (current.Value.CompareTo(nodeToRemove.Value) == 0)//should be a .Equals
+                if (Comparer.Compare(current.Value, nodeToRemove.Value) == 0)
                 {
                     if (current.Left == null && current.Right == null)
                     {
-                        if (parent.Left == current)
+                        return null;
+                    }
+                    else if (current.Left == null || current.Right == null)
+                    {
+                        if (current.Left == null)
                         {
-                            parent.Left = null;
+                            return current.Right;                    
                         }
                         else
                         {
-                            parent.Right = null;
+                            return current.Left;
                         }
                     }
-                    else
+                   
+                    Node<T> replacement = current.Right;
+                    while (replacement.Left != null)
                     {
-                        Node<T> replacement = current.Left;
-                        while (replacement.Right != null)
-                        {
-                            parent = replacement;
-                            replacement = replacement.Right;
-                        }
-
-                        current.Value = replacement.Value;
-
-                        Remove(replacement, root, null);           
+                        replacement = replacement.Left;
                     }
+
+                    current.Value = replacement.Value;
+
+                    current.Right = Remove(replacement, current.Right);                  
                 }
                 else
                 {
-                    Remove(nodeToRemove, current.Right, current);
+                    current.Right = Remove(nodeToRemove, current.Right);
                 }
             }
 
-            current = FixUp(current, parent);
+            current = FixUp(current);
             return current;
         }
         private void MoveRedRight(Node<T> node)
         {
             //if node.right is a 2 node(if it has 2 black children)
-            if (/*!IsRed(node.Right) && */node.Right != null && node.Right.Right != null && node.Right.Left != null && !IsRed(node.Right.Right) && !IsRed(node.Right.Left))
+            if (!IsRed(node.Right) && node.Right != null && !IsRed(node.Right.Right) && !IsRed(node.Right.Left))
             {
-                FlipColor(node.Right);
+                FlipColor(node);
 
-                if (node.Right.Left != null && IsRed(node.Right.Left.Left))
+                if (node.Left != null && IsRed(node.Left.Left))
                 {
-                    node.Right = RotateRight(node.Right);
-                    FlipColor(node.Right);
+                    node = RotateRight(node);
+                    FlipColor(node);
                 }
             }
             return;
@@ -202,28 +205,22 @@ namespace RedBlackTree
         private void MoveRedLeft(Node<T> node)
         {
             //if node.left is a 2 node
-            //changed MoveRedRight***
-            if (node.Left != null && !IsRed(node.Left) && !IsRed(node.Left.Left))
+            if (!IsRed(node.Left) && !IsRed(node.Left.Left))
             {
-                FlipColor(node.Left);
+                FlipColor(node);
 
                 if (node.Right != null && IsRed(node.Right.Left))
                 {
-                    node = RotateRight(node.Right);
+                    node = RotateRight(node);
                     RotateLeft(node);
                 }
             }
         }
-        private Node<T> FixUp(Node<T> node, Node<T> parent)
+        private Node<T> FixUp(Node<T> node)
         {
             if (IsRed(node.Right))
             {
                 node = RotateLeft(node);
-                if (parent != null)
-                {
-                    parent.Right = node;
-                }
-
             }
             if (node.Left != null && IsRed(node.Left) && IsRed(node.Left.Left))
             {
@@ -235,10 +232,8 @@ namespace RedBlackTree
             }
             if (node.Left != null && !IsRed(node.Left.Left) && IsRed(node.Left.Right))
             {
-                if (IsRed(node.Left.Right))
-                {
-                    node = RotateLeft(node);
-                }
+                node.Left = RotateLeft(node.Left);
+                
                 if (IsRed(node.Left) && IsRed(node.Left.Left))
                 {
                     node = RotateRight(node);
@@ -246,6 +241,57 @@ namespace RedBlackTree
             }
 
             return node;
+        }
+        public Queue<T> TraversalStart()
+        {
+            if (root == null)
+            {
+                throw new Exception("tree is empty");
+            }
+            Queue<T> queue = new Queue<T>();
+            Traversal(root, queue);
+            return queue;
+        }
+        public void Traversal(Node<T> currentNode, Queue<T> queue)
+        {
+            if (currentNode == null)
+            {
+                return;
+            }
+
+            Traversal(currentNode.Left, queue);
+            queue.Enqueue(currentNode.Value);
+            Traversal(currentNode.Right, queue);
+        }
+        public Node<T> Search(T value)
+        {
+            Node<T> nodeToSearch = new Node<T>(value);
+            return Search(nodeToSearch, root);
+        }
+        private Node<T> Search(Node<T> nodeToSearch, Node<T> current)
+        {
+            if (current == null)
+            {
+                return current;
+            }
+
+            if (Comparer.Compare(nodeToSearch.Value, current.Value) < 0)
+            {
+                return Search(nodeToSearch, current.Left);
+            }
+            else if (Comparer.Compare(nodeToSearch.Value, current.Value) > 0)
+            {
+                return Search(nodeToSearch, current.Right);
+            }
+            else
+            {
+                return current;
+            }
+        }
+        public void Clear()
+        {
+            root = null;
+            Count = 0;
         }
     }
 }
