@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PerceptronTrainingWithHillClimbing
+namespace MorePerceptron
 {
     internal class Perceptron
     {
@@ -12,22 +12,34 @@ namespace PerceptronTrainingWithHillClimbing
         public double bias;
         public double MutationAmount;
         public Random random;
-        public Func<double[], double[], double> ErrorFunc;
+        public double LearningRate { get; set; }
 
-        public Perceptron(double[] initialWeightValues, double initialBiasValue, double mutationAmount, Random rand, Func<double[], double[], double> errorFunc)
+        ActivationFunction ActivationFunction;
+        ErrorFunction ErrorFunction;
+
+        public Perceptron(double[] initialWeightValues, double initialBiasValue, double mutationAmount, Random rand, ActivationFunction activationFunction, ErrorFunction errorFunc)
         {
             weights = initialWeightValues;
             bias = initialBiasValue;
             MutationAmount = mutationAmount;
             random = rand;
-            ErrorFunc = errorFunc;
+            ActivationFunction = activationFunction;
+            ErrorFunction = errorFunc;
         }
-        public Perceptron(int amountOfWeights, double mutationAmount, Random rand, Func<double[], double[], double> errorFunc)
+        public Perceptron(int amountOfWeights, double mutationAmount, Random rand, ActivationFunction activationFunction, ErrorFunction errorFunction)
         {
             weights = new double[amountOfWeights];
             MutationAmount = mutationAmount;
             random = rand;
-            ErrorFunc = errorFunc;
+            ActivationFunction = activationFunction;
+            ErrorFunction = errorFunction;
+        }
+        public Perceptron(int amountOfWeights, double learningRate, ActivationFunction activationFunction, ErrorFunction errorFunction)
+        {
+            weights = new double[amountOfWeights];
+            LearningRate = learningRate;
+            ActivationFunction = activationFunction;
+            ErrorFunction = errorFunction;
         }
 
         public void Randomize(Random random, double min, double max)
@@ -57,14 +69,32 @@ namespace PerceptronTrainingWithHillClimbing
             }
             return output;
         }
+        public double ComputeWithActivationFunction(double[] inputs)
+        {
+            return ActivationFunction.function(Compute(inputs));
+        }
+        public double[] ComputeMoreWithActivationFunction(double[][] inputs)
+        {
+            double[] output = new double[inputs.Length];
+            for(int rows = 0; rows < inputs.GetLength(0); rows++)
+            {
+                output[rows] = ComputeWithActivationFunction(inputs[rows]);
+            }
+            return output;
+        }
         public double GetError(double[][] inputs, double[] desiredOutputs)
         {
             double[] outputs = Compute(inputs);
-            return ErrorFunc(outputs, desiredOutputs);
+            double error = 0;
+            for (int i = 0; i < outputs.Length; i++)
+            {
+                error += ErrorFunction.function(outputs[i], desiredOutputs[i]);
+            }
+            return error / desiredOutputs.Length;
         }
         public Perceptron Mutate()
         {
-            Perceptron current = new Perceptron(weights, bias, MutationAmount, random, ErrorFunc);
+            Perceptron current = new Perceptron(weights, bias, MutationAmount, random, ActivationFunction, ErrorFunction);
             int weightOrBias = current.random.Next(2);
             int mutationChange = current.random.Next(2);
 
@@ -108,6 +138,36 @@ namespace PerceptronTrainingWithHillClimbing
             }
 
             return currentError;
+        }
+        public double Train(double[] inputs, double desiredOutput)
+        {
+            double output = ComputeWithActivationFunction(inputs);
+            double change = LearningRate * -ErrorFunction.derivative(output, desiredOutput);
+
+            for (int i = 0; i < weights.Length; i++)
+            {
+                weights[i] += change;
+            }
+            bias += change;
+
+            return ErrorFunction.derivative(output, desiredOutput);
+        }
+        public double BatchTrain(double[][] inputs, double[] desiredOutput)
+        {
+            double[] output = ComputeMoreWithActivationFunction(inputs);
+            double change = 0;
+            for (int i = 0; i < output.Length; i++)
+            {
+                change += LearningRate * -ErrorFunction.derivative(output[i], desiredOutput[i]);
+            }
+
+            for (int i = 0; i < weights.Length; i++)
+            {
+                weights[i] += change;
+            }
+            bias += change;
+
+            return GetError(inputs, desiredOutput);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace PerceptronTrainingWithHillClimbing
+﻿namespace MorePerceptron
 {
     internal class Program
     {
@@ -12,6 +12,7 @@
 
             return error / desiredOutputs.Length;
         }
+       
         static double[] getDesiredOutputsForLineOfBestFit(double[][] inputs, double slope, double yint)
         {
             double[] outputs = new double[inputs.Length];
@@ -31,6 +32,7 @@
                 Console.WriteLine(currentError);
             }
         }
+       
         static double[] getDesiredOutputsAndGate(double[][] inputs)
         {
             double[] outputs = new double[inputs.Length];
@@ -71,6 +73,28 @@
                 Console.WriteLine($"or:{currentError}");
             }
         }
+        
+        static double Normalize(double value, double min, double max, double nMin, double nMax)
+        {
+            return ( (value - min) / (max - min) ) * (nMax - nMin) + nMin;
+        }
+        static double[] Filtering(double[] outputs)
+        {
+            double[] filteredOutputs = new double[outputs.Length];
+            for (int i = 0; i < outputs.Length; i++)
+            {
+                if (outputs[i] >= 0.5)
+                {
+                    filteredOutputs[i] = 1;
+                }
+                else
+                {
+                    filteredOutputs[i] = 0;
+                }
+            }
+
+            return filteredOutputs;
+        }
         static void Main(string[] args)
         {
             Random random = new Random();
@@ -83,29 +107,38 @@
                                           [0, 1],
                                           [1, 0],
                                           [1, 1]};
-            Perceptron perceptronAnd = new Perceptron(weights, random.NextDouble(), 0.01, random, ErrorFunc);
-            Perceptron perceptronOr = new Perceptron(weights, random.NextDouble(), 0.01, random, ErrorFunc);
+            Perceptron perceptronAnd = new Perceptron(weights, random.NextDouble(), 0.01, random, ActivationFunctions.Sigmoid, ErrorFunctions.MSE);
+            Perceptron perceptronOr = new Perceptron(weights, random.NextDouble(), 0.01, random, ActivationFunctions.Sigmoid, ErrorFunctions.MSE);
 
-            AndGate(perceptronAnd, getDesiredOutputsAndGate(inputsForGates), inputsForGates);
-            OrGate(perceptronOr, getDesiredOutputsOrGate(inputsForGates), inputsForGates);
-            double[] or = perceptronOr.Compute(inputsForGates);
-            double[] and = perceptronAnd.Compute(inputsForGates);
+            //OrGate(perceptronOr, getDesiredOutputsOrGate(inputsForGates), inputsForGates);
+            //double[] or = perceptronOr.ComputeMoreWithActivationFunction(inputsForGates);
+            //AndGate(perceptronAnd, getDesiredOutputsAndGate(inputsForGates), inputsForGates);
+            //double[] and = perceptronAnd.ComputeMoreWithActivationFunction(inputsForGates);
 
-            
-            weights = new double[10];
+            //double[] filteredAnd = Filtering(and);
+            //double[] filteredOr = Filtering(or);
+
             double[][] inputs = new double[10][];
-            for (int i = 0; i < weights.Length; i++)
-            {
-                weights[i] = random.NextDouble();
-            }
             for (int i = 0; i < inputs.Length; i++)
             {
-                inputs[i] = [i];
+                inputs[i] = new double[2];
+                //inputs[i][0] = i;
+                inputs[i][0] = Normalize(i, 0, 10, 0, 1);
             }
-            Perceptron perceptronLineOfBestFit = new Perceptron(weights, random.NextDouble(), 0.1, random, ErrorFunc);
+            double[] desiredOuputs = getDesiredOutputsForLineOfBestFit(inputs, 20, 6);
+            for (int i = 0; i < inputs.Length; i++)
+            {
+                inputs[i][1] = desiredOuputs[i];
+            }
 
-            //LineOfBestFit(perceptronLineOfBestFit, inputs, getDesiredOutputsForLineOfBestFit(inputs, 2, 3));
-            
+            //Perceptron perceptronLineOfBestFit = new Perceptron(10, 0.1, random, ErrorFunc);
+            //perceptronLineOfBestFit.Randomize(random, 0, 8);
+
+            Perceptron gradientDescentPerceptron = new Perceptron(10, 3, ActivationFunctions.Tanh, ErrorFunctions.MSE);
+            //*****TEST THISSSS^^^^^^^^^^^^^^^^^^^^^^^^^^^ WOOOOOOOOO
+
+            //LineOfBestFit(perceptronLineOfBestFit, inputs, desiredOuputs);
+            //double[] result = perceptronLineOfBestFit.Compute(inputs);
 
         }
     }
