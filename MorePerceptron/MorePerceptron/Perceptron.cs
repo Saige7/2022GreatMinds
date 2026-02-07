@@ -89,7 +89,9 @@ namespace MorePerceptron
             for (int i = 0; i < outputs.Length; i++)
             {
                 error += ErrorFunction.function(outputs[i], desiredOutputs[i]);
+                
             }
+            Console.WriteLine(error);
             return error / desiredOutputs.Length;
         }
         public Perceptron Mutate()

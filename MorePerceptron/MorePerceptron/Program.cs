@@ -18,7 +18,7 @@
             double[] outputs = new double[inputs.Length];
             for (int i = 0; i < inputs.Length; i++)
             {
-                outputs[i] = slope * inputs[i][0] + yint;
+                outputs[i] = Normalize(slope * inputs[i][0] + yint, 0, 30, 0, 1);
             }
 
             return outputs;
@@ -26,10 +26,11 @@
         static void LineOfBestFit(Perceptron perceptron, double[][] inputs, double[] desiredOutputs)
         {
             double currentError = perceptron.GetError(inputs, desiredOutputs);
-            while (currentError > .5)
+            while (currentError > .0001)
             {
-                currentError = perceptron.TrainWithHillClimbing(inputs, desiredOutputs, currentError);
-                Console.WriteLine(currentError);
+                //currentError = perceptron.TrainWithHillClimbing(inputs, desiredOutputs, currentError);
+                currentError = perceptron.BatchTrain(inputs, desiredOutputs);
+                Console.WriteLine($"total error: {currentError}");
             }
         }
        
@@ -125,19 +126,23 @@
                 //inputs[i][0] = i;
                 inputs[i][0] = Normalize(i, 0, 10, 0, 1);
             }
-            double[] desiredOuputs = getDesiredOutputsForLineOfBestFit(inputs, 20, 6);
+            double[] desiredOutputs = getDesiredOutputsForLineOfBestFit(inputs, 20, 6);
             for (int i = 0; i < inputs.Length; i++)
             {
-                inputs[i][1] = desiredOuputs[i];
+                inputs[i][1] = desiredOutputs[i];
             }
 
             //Perceptron perceptronLineOfBestFit = new Perceptron(10, 0.1, random, ErrorFunc);
             //perceptronLineOfBestFit.Randomize(random, 0, 8);
 
-            Perceptron gradientDescentPerceptron = new Perceptron(10, 3, ActivationFunctions.Tanh, ErrorFunctions.MSE);
-            //*****TEST THISSSS^^^^^^^^^^^^^^^^^^^^^^^^^^^ WOOOOOOOOO
+            Perceptron gradientDescentPerceptron = new Perceptron(10, .001, ActivationFunctions.Tanh, ErrorFunctions.MSE);
 
-            //LineOfBestFit(perceptronLineOfBestFit, inputs, desiredOuputs);
+            gradientDescentPerceptron.Randomize(random, 0, 1);
+            LineOfBestFit(gradientDescentPerceptron, inputs, desiredOutputs);
+            double[] gradientDescentResult = gradientDescentPerceptron.ComputeMoreWithActivationFunction(inputs);
+            //error is going up so gradient descent going wrong direction :( fix***************************** 
+
+            //LineOfBestFit(perceptronLineOfBestFit, inputs, desiredOutputs);
             //double[] result = perceptronLineOfBestFit.Compute(inputs);
 
         }

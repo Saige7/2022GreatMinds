@@ -16,13 +16,23 @@ namespace MorePerceptron
             function = func;
             derivative = deriv;
         }
+        public static double test(double x)
+        {
+            double firstE = Math.Pow(Math.E, x);
+            double secondE = Math.Pow(Math.E, -x);
+            double numerator = firstE - secondE;
+            double denominator = firstE + secondE;
+            double final = numerator / denominator;
+            return final;
+        }
     }
-
+    //(Math.Pow(Math.E, x) - Math.Pow(Math.E, -x)) / (Math.Pow(Math.E, x) + Math.Pow(Math.E, -x))
     public static class ActivationFunctions
     {
-        public static ActivationFunction Tanh => new ActivationFunction((x) => ( (Math.Pow(Math.E, x) - Math.Pow(Math.E, -x)) / (Math.Pow(Math.E, x) + Math.Pow(Math.E, -x)) ), 
+        public static ActivationFunction Tanh => new ActivationFunction((x) => ( ActivationFunction.test(x)), 
                                                       (x) => ( 1 - Math.Pow(((Math.Pow(Math.E, x) - Math.Pow(Math.E, -x)) / (Math.Pow(Math.E, x) + Math.Pow(Math.E, -x))), 2) ));
         public static ActivationFunction Sigmoid => new ActivationFunction((x) => ( 1 / (1 + Math.Pow(Math.E, -x)) ), 
                                 (x) => ( (1 / (1 + Math.Pow(Math.E, -x))) * (1 - (1 / (1 + Math.Pow(Math.E, -x)))) ) );
     }
+
 }
