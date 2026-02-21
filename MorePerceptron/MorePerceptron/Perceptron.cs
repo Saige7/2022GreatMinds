@@ -88,7 +88,7 @@ namespace MorePerceptron
             double error = 0;
             for (int i = 0; i < outputs.Length; i++)
             {
-                error += ErrorFunction.function(outputs[i], desiredOutputs[i]);
+                error += ErrorFunction.function(desiredOutputs[i], outputs[i]);
                 
             }
             Console.WriteLine(error);
@@ -143,8 +143,8 @@ namespace MorePerceptron
         }
         public double Train(double[] inputs, double desiredOutput)
         {
-            double output = ComputeWithActivationFunction(inputs);
-            double change = LearningRate * -ErrorFunction.derivative(output, desiredOutput);
+            double output = Compute(inputs);
+            double change = LearningRate * -ErrorFunction.derivative(desiredOutput, output);
 
             for (int i = 0; i < weights.Length; i++)
             {
@@ -152,15 +152,15 @@ namespace MorePerceptron
             }
             bias += change;
 
-            return ErrorFunction.derivative(output, desiredOutput);
+            return ErrorFunction.derivative(desiredOutput, output);
         }
         public double BatchTrain(double[][] inputs, double[] desiredOutput)
         {
-            double[] output = ComputeMoreWithActivationFunction(inputs);
+            double[] output = Compute(inputs);
             double change = 0;
             for (int i = 0; i < output.Length; i++)
             {
-                change += LearningRate * -ErrorFunction.derivative(output[i], desiredOutput[i]);
+                change += LearningRate * -ErrorFunction.derivative(desiredOutput[i], output[i]);
             }
 
             for (int i = 0; i < weights.Length; i++)
