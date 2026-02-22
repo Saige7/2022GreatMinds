@@ -4,7 +4,8 @@
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            
+            NeuralNetwork neuralNetwork = new NeuralNetwork();
         }
     }
 }
