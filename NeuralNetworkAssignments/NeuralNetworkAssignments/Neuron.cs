@@ -17,9 +17,19 @@ namespace NeuralNetworkAssignments
         public Neuron(ActivationFunction activationFunction, Neuron[] previousNeurons)
         {
             ActivationFunction = activationFunction;
+            
             if (previousNeurons != null)
             {
                 Dendrites = new Dendrite[previousNeurons.Length];
+            }
+            else
+            {
+                Dendrites = new Dendrite[0];
+            }
+
+            for (int i = 0; i < Dendrites.Length; i++)
+            {
+                Dendrites[i] = new Dendrite(previousNeurons[i], this, 0);
             }
         }
 

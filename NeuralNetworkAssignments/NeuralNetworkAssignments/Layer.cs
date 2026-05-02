@@ -19,6 +19,7 @@ namespace NeuralNetworkAssignments
                 if (previousLayer == null)
                 {
                     Neurons[i] = new Neuron(activationFunction, null);
+                    continue;
                 }
                 Neurons[i] = new Neuron(activationFunction, previousLayer.Neurons);
             }

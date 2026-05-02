@@ -9,8 +9,8 @@ namespace NeuralNetworkAssignments
 {
     internal class NeuralNetwork
     {
-        Layer[] Layers;
-        ErrorFunction ErrorFunction;
+        public Layer[] Layers;
+        public ErrorFunction ErrorFunction;
 
         public NeuralNetwork(ActivationFunction activationFunction, ErrorFunction errorFunction, params int[] neuronsPerLayer)
         {
